@@ -6,6 +6,7 @@ import gzip
 import hashlib
 import json
 import os
+import re
 import sys
 import uuid
 from datetime import datetime
@@ -76,6 +77,8 @@ def scrape_recipe(url: str, existing: dict) -> tuple[dict, bytes | None]:
     name = og_title["content"] if og_title and og_title.get("content") else (
         soup.find("h1").get_text(strip=True) if soup.find("h1") else existing["name"]
     )
+    name = re.sub(r"(?i)^recept voor\s+", "", name).strip()  # remove "Recept voor " prefix
+    name = re.sub(r"\s*\|.*$", "", name).strip()             # remove " | Store name" suffix
 
     def safe(fn, default=None):
         try:
