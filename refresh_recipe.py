@@ -56,13 +56,19 @@ def fetch_photo(image_url: str | None) -> tuple[dict, bytes | None]:
         return {"photo": None, "photo_hash": None, "photo_large": None}, None
 
 
+HEADERS = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"}
+
+
 def scrape_recipe(url: str, existing: dict) -> tuple[dict, bytes | None]:
-    resp = requests.get(url, timeout=10)
+    resp = requests.get(url, headers=HEADERS, timeout=10)
     resp.raise_for_status()
     html = resp.text
 
     soup = BeautifulSoup(html, "html.parser")
-    scraper = scrape_html(html, org_url=url)
+    try:
+        scraper = scrape_html(html, org_url=url)
+    except Exception:
+        scraper = scrape_html(html, org_url=url, wild_mode=True)
 
     og_title = soup.find("meta", property="og:title")
     name = og_title["content"] if og_title and og_title.get("content") else (
@@ -85,7 +91,7 @@ def scrape_recipe(url: str, existing: dict) -> tuple[dict, bytes | None]:
         "ingredients":    "\n".join(safe(scraper.ingredients, [])),
         "directions":     safe(scraper.instructions, ""),
         "description":    safe(scraper.description, ""),
-        "source":         "Dagelijkse Kost",
+        "source":         safe(scraper.host) or requests.utils.urlparse(url).netloc,
         "source_url":     url,
         "prep_time":      format_minutes(safe(scraper.prep_time, 0)),
         "cook_time":      format_minutes(safe(scraper.cook_time, 0)),
