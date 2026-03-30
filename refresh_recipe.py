@@ -64,12 +64,13 @@ def scrape_recipe(url: str, existing: dict) -> tuple[dict, bytes | None]:
     resp = requests.get(url, headers=HEADERS, timeout=10)
     resp.raise_for_status()
     html = resp.text
+    final_url = resp.url  # follow redirects for correct site detection
 
     soup = BeautifulSoup(html, "html.parser")
     try:
-        scraper = scrape_html(html, org_url=url)
+        scraper = scrape_html(html, org_url=final_url)
     except Exception:
-        scraper = scrape_html(html, org_url=url, wild_mode=True)
+        scraper = scrape_html(html, org_url=final_url, wild_mode=True)
 
     og_title = soup.find("meta", property="og:title")
     name = og_title["content"] if og_title and og_title.get("content") else (
