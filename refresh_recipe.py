@@ -172,6 +172,21 @@ def main():
     recipe, photo_bytes = scrape_recipe(url, existing)
     print(f"Scraped:  {recipe['name']}")
 
+    existing_steps = [s for s in existing.get("directions", "").split("\n") if s.strip()]
+    scraped_steps  = [s for s in recipe.get("directions", "").split("\n") if s.strip()]
+    print(f"  directions: {len(existing_steps)} → {len(scraped_steps)} steps")
+
+    if not scraped_steps:
+        print("Warning: scraped directions are empty. Aborting to avoid data loss.")
+        print("Use --dry-run to inspect what was scraped.")
+        sys.exit(1)
+
+    if existing_steps and len(scraped_steps) < len(existing_steps) * 0.5:
+        print(f"Warning: scraped only {len(scraped_steps)} steps, existing has {len(existing_steps)}.")
+        answer = input("Continue anyway? [y/N] ").strip().lower()
+        if answer != "y":
+            sys.exit(1)
+
     if args.dry_run:
         preview = {**recipe, "photo": f"<{len(photo_bytes)} bytes>" if photo_bytes else None}
         print(json.dumps(preview, indent=2, ensure_ascii=False))
