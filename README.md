@@ -40,7 +40,19 @@ Re-scrapes a recipe and updates it in Paprika, preserving the original UID and c
 .venv/bin/python refresh_recipe.py <recipe-uid> https://dagelijksekost.vrt.be/gerechten/...
 ```
 
-Works with any site supported by [recipe-scrapers](https://github.com/hhursev/recipe-scrapers), with a generic fallback for unsupported sites.
+Works with any site supported by [recipe-scrapers](https://github.com/hhursev/recipe-scrapers), with a generic fallback for unsupported sites. Before overwriting, the previous version is saved to `backup/<uid>_<timestamp>.json`.
+
+### `.venv/bin/python restore_recipe.py <uid> [timestamp]`
+
+Restores a recipe from a backup and re-uploads it to Paprika. If no timestamp is given and multiple backups exist, you'll be prompted to pick one.
+
+```
+# Pick interactively
+.venv/bin/python restore_recipe.py <recipe-uid>
+
+# Restore a specific version
+.venv/bin/python restore_recipe.py <recipe-uid> 20260330_143000
+```
 
 ## Caching
 
