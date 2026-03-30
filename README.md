@@ -28,13 +28,19 @@ Picks a random main course (category: Hoofdgerecht) from your Paprika library an
 
 Shows the next 14 days of your Paprika meal plan. Recipes that are cached locally are shown as clickable links.
 
-### `.venv/bin/python refresh_recipe.py <uid> <url>`
+### `.venv/bin/python refresh_recipe.py <uid> [url]`
 
-Re-scrapes a recipe from a new URL and updates it in Paprika, preserving the original UID and categories. Useful when a recipe has moved to a new URL.
+Re-scrapes a recipe and updates it in Paprika, preserving the original UID and categories. If no URL is given, the recipe's stored source URL is used. Useful when a recipe's content has changed or moved to a new URL.
 
 ```
+# Re-scrape from the stored URL
+.venv/bin/python refresh_recipe.py <recipe-uid>
+
+# Re-scrape from a new URL
 .venv/bin/python refresh_recipe.py <recipe-uid> https://dagelijksekost.vrt.be/gerechten/...
 ```
+
+Works with any site supported by [recipe-scrapers](https://github.com/hhursev/recipe-scrapers), with a generic fallback for unsupported sites.
 
 ## Caching
 
