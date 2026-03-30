@@ -11,7 +11,7 @@ class Paprika
   THREADS        = 20
   CACHE_DIR      = File.join(__dir__, "cache")
   HTML_CACHE_DIR = File.join(__dir__, "html_cache")
-  SKIP_HEADERS   = %w[BEREIDING INGREDIËNTEN INGREDIENTEN].freeze
+  SKIP_HEADERS   = %w[BEREIDING INGREDIËNTEN INGREDIENTEN INSTRUCTIES].freeze
 
   def initialize
     @email    = ENV["PAPRIKA_EMAIL"]    or raise "PAPRIKA_EMAIL not set"
@@ -27,7 +27,7 @@ class Paprika
       $stderr.puts "Fetching #{stale.length} new/updated recipes (#{listing.length - stale.length} cached)..."
       fetch_in_parallel(stale.map { |r| r["uid"] })
     end
-    listing.map { |r| load_cache(r["uid"]) }
+    listing.map { |r| load_cache(r["uid"]) }.reject { |r| r["in_trash"] }
   end
 
   def categories
