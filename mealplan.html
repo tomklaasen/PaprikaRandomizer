@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maaltijdplanning</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Lora:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream:  #faf6f0;
+      --ink:    #2c1f0e;
+      --muted:  #8a7560;
+      --accent: #b84c2b;
+      --rule:   #d9cfc2;
+      --today:  #f5ede3;
+    }
+
+    body {
+      background: var(--cream);
+      color: var(--ink);
+      font-family: 'Lora', Georgia, serif;
+      min-height: 100vh;
+      padding: 3rem 1.5rem 6rem;
+    }
+
+    .page {
+      max-width: 860px;
+      margin: 0 auto;
+      animation: rise 0.6s ease both;
+    }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .label {
+      display: inline-block;
+      font-style: italic;
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      line-height: 1.15;
+    }
+
+    /* ── meal list ── */
+    .meals {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .day {
+      display: grid;
+      grid-template-columns: 10rem 1fr;
+      gap: 0 2.5rem;
+      padding: 1.4rem 0;
+      border-bottom: 1px solid var(--rule);
+      align-items: baseline;
+    }
+
+    .day.today {
+      background: var(--today);
+      margin: 0 -1.5rem;
+      padding: 1.4rem 1.5rem;
+      border-radius: 4px;
+      border-bottom: none;
+    }
+
+    .day-label {
+      text-align: right;
+    }
+
+    .day-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--ink);
+      text-transform: capitalize;
+    }
+
+    .today .day-name {
+      color: var(--accent);
+    }
+
+    .day-date {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 0.2rem;
+    }
+
+    .meal-name {
+      font-size: 1rem;
+      line-height: 1.5;
+      color: var(--ink);
+    }
+
+    .meal-name.empty {
+      color: var(--muted);
+      font-style: italic;
+      font-size: 0.85rem;
+    }
+
+    .meal-name a {
+      color: var(--ink);
+      text-decoration: underline;
+      text-decoration-color: var(--rule);
+      text-underline-offset: 3px;
+      transition: text-decoration-color 0.15s;
+    }
+
+    .meal-name a:hover {
+      text-decoration-color: var(--accent);
+    }
+
+    .multi-meal {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <span class="label">Wat staat er op het menu?</span>
+      <h1>Maaltijdplanning</h1>
+    </header>
+
+    <div class="meals">
+      {{DAYS}}
+    </div>
+  </div>
+</body>
+</html>
