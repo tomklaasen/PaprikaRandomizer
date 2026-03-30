@@ -133,7 +133,7 @@ def clear_cache(uid: str) -> None:
 def main():
     parser = argparse.ArgumentParser(description="Re-scrape a recipe from a new URL and update it in Paprika.")
     parser.add_argument("uid",  help="UID of the existing Paprika recipe to update")
-    parser.add_argument("url",  help="New URL to scrape the recipe from")
+    parser.add_argument("url", nargs="?", default=None, help="URL to scrape (defaults to the recipe's stored source_url)")
     parser.add_argument("--dry-run", action="store_true", help="Scrape and print without uploading")
     args = parser.parse_args()
 
@@ -145,10 +145,14 @@ def main():
         sys.exit(1)
 
     existing = json.loads(cache_file.read_text())
+    url = args.url or existing.get("source_url")
+    if not url:
+        print("Error: no URL provided and recipe has no stored source_url.")
+        sys.exit(1)
     print(f"Existing recipe: {existing['name']}")
-    print(f"Scraping: {args.url}")
+    print(f"Scraping: {url}")
 
-    recipe, photo_bytes = scrape_recipe(args.url, existing)
+    recipe, photo_bytes = scrape_recipe(url, existing)
     print(f"Scraped:  {recipe['name']}")
 
     if args.dry_run:
