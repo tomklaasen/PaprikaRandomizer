@@ -165,6 +165,10 @@ def main():
     print("Clearing local cache...")
     clear_cache(args.uid)
 
+    print("Opening in browser...")
+    import subprocess
+    subprocess.run(["ruby", Path(__file__).parent / "show_recipe.rb", args.uid], check=True)
+
     print("Done!")
 
 
