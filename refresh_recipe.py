@@ -123,11 +123,23 @@ def upload_recipe(recipe: dict, photo_bytes: bytes | None, token: str) -> None:
         raise RuntimeError(f"Paprika upload failed: {resp.json()}")
 
 
-def clear_cache(uid: str) -> None:
-    for path in [CACHE_DIR / f"{uid}.json", HTML_CACHE_DIR / f"{uid}.html"]:
-        if path.exists():
-            path.unlink()
-            print(f"  Cleared {path.name}")
+BACKUP_DIR = Path(__file__).parent / "backup"
+
+
+def backup_and_clear_cache(uid: str) -> None:
+    BACKUP_DIR.mkdir(exist_ok=True)
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+    json_path = CACHE_DIR / f"{uid}.json"
+    if json_path.exists():
+        backup_path = BACKUP_DIR / f"{uid}_{timestamp}.json"
+        json_path.rename(backup_path)
+        print(f"  Backed up to {backup_path.name}")
+
+    html_path = HTML_CACHE_DIR / f"{uid}.html"
+    if html_path.exists():
+        html_path.unlink()
+        print(f"  Cleared {html_path.name}")
 
 
 def main():
@@ -172,8 +184,8 @@ def main():
     print("Uploading to Paprika...")
     upload_recipe(recipe, photo_bytes, token)
 
-    print("Clearing local cache...")
-    clear_cache(args.uid)
+    print("Backing up and clearing local cache...")
+    backup_and_clear_cache(args.uid)
 
     print("Opening in browser...")
     import subprocess

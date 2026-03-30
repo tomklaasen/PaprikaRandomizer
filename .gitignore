@@ -3,4 +3,5 @@ Paprika Export*/
 .env
 cache/
 html_cache/
+backup/
 .venv/
