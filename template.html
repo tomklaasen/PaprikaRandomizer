@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{TITLE}}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Lora:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream:     #faf6f0;
+      --paper:     #f2ebe0;
+      --ink:       #2c1f0e;
+      --muted:     #8a7560;
+      --accent:    #b84c2b;
+      --rule:      #d9cfc2;
+    }
+
+    body {
+      background: var(--cream);
+      color: var(--ink);
+      font-family: 'Lora', Georgia, serif;
+      min-height: 100vh;
+      padding: 3rem 1.5rem 6rem;
+    }
+
+    .page {
+      max-width: 720px;
+      margin: 0 auto;
+      animation: rise 0.6s ease both;
+    }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── header ── */
+    .header {
+      text-align: center;
+      padding-bottom: 2.5rem;
+      border-bottom: 1px solid var(--rule);
+      margin-bottom: 3rem;
+    }
+
+    .label {
+      display: inline-block;
+      font-family: 'Lora', serif;
+      font-size: 0.7rem;
+      font-style: italic;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1.2rem;
+    }
+
+    h1 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-weight: 700;
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      line-height: 1.15;
+      color: var(--ink);
+    }
+
+    /* ── two-column layout ── */
+    .body {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 3rem 4rem;
+      align-items: start;
+    }
+
+    @media (max-width: 600px) {
+      .body { grid-template-columns: 1fr; gap: 2.5rem; }
+    }
+
+    /* ── section headings ── */
+    h2 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1.2rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    /* ── ingredients ── */
+    .ingredients ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+    }
+
+    .ingredients li {
+      font-size: 0.92rem;
+      line-height: 1.5;
+      padding-left: 1rem;
+      position: relative;
+      color: var(--ink);
+    }
+
+    .ingredients li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0.6em;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--accent);
+      opacity: 0.6;
+    }
+
+    /* ── directions ── */
+    .directions ol {
+      list-style: none;
+      counter-reset: steps;
+      display: flex;
+      flex-direction: column;
+      gap: 1.4rem;
+    }
+
+    .directions li {
+      counter-increment: steps;
+      display: grid;
+      grid-template-columns: 2rem 1fr;
+      gap: 0 1rem;
+      font-size: 0.95rem;
+      line-height: 1.75;
+    }
+
+    .directions li::before {
+      content: counter(steps);
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      color: var(--accent);
+      opacity: 0.5;
+      padding-top: 0.1em;
+      text-align: right;
+    }
+
+    .directions li.section-header {
+      counter-increment: none;
+      display: block;
+      font-family: 'Playfair Display', serif;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin-top: 0.8rem;
+    }
+
+    .directions li.section-header::before {
+      content: none;
+    }
+  </style>
+</head>
+<body>
+  <article class="page">
+    <header class="header">
+      <span class="label">Vanavond koken we</span>
+      <h1>{{TITLE}}</h1>
+    </header>
+
+    <div class="body">
+      <section class="ingredients">
+        <h2>Ingrediënten</h2>
+        <ul>
+          {{INGREDIENTS}}
+        </ul>
+      </section>
+
+      <section class="directions">
+        <h2>Bereiding</h2>
+        <ol>
+          {{DIRECTIONS}}
+        </ol>
+      </section>
+    </div>
+  </article>
+</body>
+</html>

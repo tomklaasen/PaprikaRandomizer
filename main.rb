@@ -2,12 +2,15 @@ require 'net/http'
 require 'json'
 require 'uri'
 require 'fileutils'
+require 'tmpdir'
+require 'cgi'
 require 'dotenv/load'
 
 class Main
-  API_BASE  = "https://www.paprikaapp.com/api/v1"
-  THREADS   = 20
-  CACHE_DIR = File.join(File.dirname(__FILE__), "cache")
+  API_BASE     = "https://www.paprikaapp.com/api/v1"
+  THREADS      = 20
+  CACHE_DIR    = File.join(File.dirname(__FILE__), "cache")
+  SKIP_HEADERS = %w[BEREIDING INGREDIËNTEN INGREDIENTEN].freeze
 
   def do_it
     email    = ENV["PAPRIKA_EMAIL"]    or raise "PAPRIKA_EMAIL not set"
@@ -30,7 +33,39 @@ class Main
     recipes = listing.map { |r| load_cache(r["uid"]) }
     hoofdgerechten = recipes.select { |r| r["categories"].include?(hoofdgerecht_id) }
 
-    puts hoofdgerechten.sample["name"]
+    recipe = hoofdgerechten.sample
+    open_in_browser(recipe)
+  end
+
+  def open_in_browser(recipe)
+    template = File.read(File.join(File.dirname(__FILE__), "template.html"))
+
+    ingredients = recipe["ingredients"].split("\n").reject(&:empty?)
+                    .map { |i| "<li>#{CGI.escapeHTML(i)}</li>" }.join("\n          ")
+
+    first_word = recipe["name"].downcase.split.first.to_s
+
+    directions  = recipe["directions"].split("\n").reject(&:empty?).filter_map do |d|
+      t = d.strip
+      next if t =~ /\Aaantal personen/i                        # servings metadata
+      next if t =~ /\A\s*\d+\s*minuten/i                       # cook time metadata
+      if t == t.upcase && t =~ /[A-Z]/                         # ALL CAPS line
+        next if SKIP_HEADERS.include?(t)                       # generic section labels
+        "<li class=\"section-header\">#{CGI.escapeHTML(t)}</li>"
+      else
+        next if first_word.length > 6 && t.downcase.start_with?(first_word)  # recipe title
+        "<li><span>#{CGI.escapeHTML(t)}</span></li>"
+      end
+    end.join("\n          ")
+
+    html = template
+      .gsub("{{TITLE}}",       CGI.escapeHTML(recipe["name"]))
+      .gsub("{{INGREDIENTS}}", ingredients)
+      .gsub("{{DIRECTIONS}}",  directions)
+
+    path = File.join(Dir.tmpdir, "paprika_recipe.html")
+    File.write(path, html)
+    system("open", path)
   end
 
   private
