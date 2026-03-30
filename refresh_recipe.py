@@ -62,7 +62,7 @@ HEADERS = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleW
 
 
 def scrape_recipe(url: str, existing: dict) -> tuple[dict, bytes | None]:
-    resp = requests.get(url, headers=HEADERS, timeout=10)
+    resp = requests.get(url, headers=HEADERS, timeout=30)
     resp.raise_for_status()
     html = resp.text
     final_url = resp.url  # follow redirects for correct site detection
