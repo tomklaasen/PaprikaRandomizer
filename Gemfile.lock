@@ -1,11 +1,7 @@
 GEM
   remote: https://rubygems.org/
   specs:
-    mini_portile2 (2.8.7)
-    nokogiri (1.16.7)
-      mini_portile2 (~> 2.8.2)
-      racc (~> 1.4)
-    racc (1.8.1)
+    dotenv (3.2.0)
 
 PLATFORMS
   aarch64-linux
@@ -17,7 +13,7 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
-  nokogiri
+  dotenv
 
 RUBY VERSION
    ruby 3.3.1p55

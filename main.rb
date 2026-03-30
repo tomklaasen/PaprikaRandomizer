@@ -1,45 +1,79 @@
-$LOAD_PATH.unshift(File.dirname(__FILE__))
-
-require 'nokogiri'
-require 'recipe'
+require 'net/http'
+require 'json'
+require 'uri'
+require 'fileutils'
+require 'dotenv/load'
 
 class Main
-	BASE_DIR = File.join(File.dirname(__FILE__), "Paprika Export 2024-09-22 09.52.24 Alle recepten")
+  API_BASE  = "https://www.paprikaapp.com/api/v1"
+  THREADS   = 20
+  CACHE_DIR = File.join(File.dirname(__FILE__), "cache")
 
+  def do_it
+    email    = ENV["PAPRIKA_EMAIL"]    or raise "PAPRIKA_EMAIL not set"
+    password = ENV["PAPRIKA_PASSWORD"] or raise "PAPRIKA_PASSWORD not set"
 
-	def do_it
-		# parse index.html
-		doc = File.open(File.join(BASE_DIR, "index.html")) { |f| Nokogiri::HTML5(f) }
+    FileUtils.mkdir_p(CACHE_DIR)
 
-		# parse recipes
-		recipes = []
-		doc.xpath("//li").each do |line|
-			recipe = Recipe.new
-			recipe.title = line.text
-			recipe.sourcefile = line.xpath("a/@href").text
-			parse_recipe(recipe)
-			recipes << recipe
-		end
+    categories      = fetch_json("/sync/categories/", email, password)["result"]
+    hoofdgerecht_id = categories.find { |c| c["name"] == "Hoofdgerecht" }&.fetch("uid")
+    raise "Category 'Hoofdgerecht' not found" unless hoofdgerecht_id
 
-		hoofdgerechten = recipes.select {|r| r.categories.include?("Hoofdgerecht")}
+    listing = fetch_json("/sync/recipes/", email, password)["result"]
+    stale   = listing.reject { |r| cache_valid?(r["uid"], r["hash"]) }
 
-		puts
-		puts hoofdgerechten.sample.title
-	end
+    unless stale.empty?
+      $stderr.puts "Fetching #{stale.length} new/updated recipes (#{listing.length - stale.length} cached)..."
+      fetch_in_parallel(stale.map { |r| r["uid"] }, email, password)
+    end
 
+    recipes = listing.map { |r| load_cache(r["uid"]) }
+    hoofdgerechten = recipes.select { |r| r["categories"].include?(hoofdgerecht_id) }
 
-	def parse_recipe(recipe)
-		rdoc = File.open(File.join(BASE_DIR, recipe.sourcefile)) { |f| Nokogiri::HTML5(f) }
-		categories_str = rdoc.xpath("//p[@itemprop='recipeCategory']").text
-		categories = categories_str.split(",")
-		categories.map! {|cat| cat.strip}
-		recipe.categories = categories
+    puts hoofdgerechten.sample["name"]
+  end
 
-		if categories.length == 0
-			puts "No category found for #{recipe}"
-		end
-	end
+  private
 
+  def cache_path(uid)
+    File.join(CACHE_DIR, "#{uid}.json")
+  end
+
+  def cache_valid?(uid, hash)
+    path = cache_path(uid)
+    return false unless File.exist?(path)
+    JSON.parse(File.read(path))["hash"] == hash
+  end
+
+  def load_cache(uid)
+    JSON.parse(File.read(cache_path(uid)))
+  end
+
+  def fetch_json(path, email, password)
+    uri = URI("#{API_BASE}#{path}")
+    req = Net::HTTP::Get.new(uri)
+    req.basic_auth(email, password)
+    res = Net::HTTP.start(uri.host, uri.port, use_ssl: true) { |http| http.request(req) }
+    JSON.parse(res.body)
+  end
+
+  def fetch_in_parallel(uids, email, password)
+    queue = uids.dup
+    mutex = Mutex.new
+
+    threads = THREADS.times.map do
+      Thread.new do
+        loop do
+          uid = mutex.synchronize { queue.shift }
+          break unless uid
+          data = fetch_json("/sync/recipe/#{uid}/", email, password)["result"]
+          File.write(cache_path(uid), JSON.generate(data))
+        end
+      end
+    end
+
+    threads.each(&:join)
+  end
 end
 
 Main.new.do_it
