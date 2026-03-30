@@ -1,0 +1,26 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    mini_portile2 (2.8.7)
+    nokogiri (1.16.7)
+      mini_portile2 (~> 2.8.2)
+      racc (~> 1.4)
+    racc (1.8.1)
+
+PLATFORMS
+  aarch64-linux
+  arm-linux
+  arm64-darwin
+  ruby
+  x86-linux
+  x86_64-darwin
+  x86_64-linux
+
+DEPENDENCIES
+  nokogiri
+
+RUBY VERSION
+   ruby 3.3.1p55
+
+BUNDLED WITH
+   2.5.9
