@@ -82,10 +82,14 @@ class Paprika
     end
     meta = meta_items.empty? ? "" : "<div class=\"meta\">#{meta_items.join}</div>"
 
+    description = recipe["description"].to_s.strip.empty? ? "" :
+      "<p class=\"description\">#{CGI.escapeHTML(recipe["description"].strip)}</p>"
+
     html = template
       .gsub("{{TITLE}}",       CGI.escapeHTML(recipe["name"]))
       .gsub("{{HERO}}",        hero)
       .gsub("{{META}}",        meta)
+      .gsub("{{DESCRIPTION}}", description)
       .gsub("{{INGREDIENTS}}", ingredients)
       .gsub("{{DIRECTIONS}}",  directions)
 

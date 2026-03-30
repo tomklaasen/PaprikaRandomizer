@@ -102,6 +102,18 @@
       text-underline-offset: 3px;
     }
 
+    /* ── description ── */
+    .description {
+      margin-top: 1.4rem;
+      font-size: 0.9rem;
+      font-style: italic;
+      color: var(--muted);
+      line-height: 1.7;
+      max-width: 560px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
     /* ── two-column layout ── */
     .body {
       display: grid;
@@ -206,6 +218,7 @@
       <span class="label">Vanavond koken we</span>
       <h1>{{TITLE}}</h1>
       {{META}}
+      {{DESCRIPTION}}
     </header>
 
     <div class="body">
