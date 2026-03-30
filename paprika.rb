@@ -49,9 +49,11 @@ class Paprika
     template   = File.read(File.join(__dir__, "template.html"))
     first_word = recipe["name"].downcase.split.first.to_s
 
-    ingredients = recipe["ingredients"].to_s.split("\n").reject(&:empty?)
-                    .map { |i| "<li>#{CGI.escapeHTML(i.gsub(/&nbsp;/i, " ").strip)}</li>" }
-                    .join("\n          ")
+    ingredients = recipe["ingredients"].to_s.split("\n").reject(&:empty?).filter_map do |i|
+      t = i.gsub(/&nbsp;/i, " ").strip
+      next if SKIP_HEADERS.include?(t.upcase)
+      "<li>#{CGI.escapeHTML(t)}</li>"
+    end.join("\n          ")
 
     directions = recipe["directions"].to_s.split("\n").reject(&:empty?).filter_map do |d|
       t = d.gsub(/&nbsp;/i, " ").strip
