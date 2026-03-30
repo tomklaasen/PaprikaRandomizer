@@ -59,6 +59,7 @@ class Paprika
       t = d.gsub(/&nbsp;/i, " ").strip
       next if t =~ /\Aaantal personen/i
       next if t =~ /\A\s*\d+\s*minuten/i
+      next if t =~ /\A\d+\z/
       if t == t.upcase && t =~ /[A-Z]/
         next if SKIP_HEADERS.include?(t)
         "<li class=\"section-header\">#{CGI.escapeHTML(t)}</li>"
