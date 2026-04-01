@@ -67,7 +67,7 @@ Syncs all recipes from Paprika and renders every recipe as a styled HTML page. S
 0 2 * * * cd /path/to/PaprikaRandomizer && ruby backup_all.rb >> /var/log/paprika_backup.log 2>&1
 ```
 
-Both the JSON files (`cache/`) and HTML pages (`html_cache/`) are updated. Only recipes that have changed since the last run are re-fetched from Paprika; unchanged ones are served from the local cache.
+Both the JSON files (`cache/`) and HTML pages (`html_cache/`) are updated. Only recipes that have changed since the last run are re-fetched from Paprika; unchanged ones are served from the local cache. An `html_cache/index.html` is also generated, listing all recipes grouped by category with a live search filter.
 
 To monitor the cronjob with [healthchecks.io](https://healthchecks.io), set `HEALTHCHECKS_URL` in `.env` to your check's ping URL. The script pings `/start` at the beginning, the base URL on success, and `/fail` on error.
 
