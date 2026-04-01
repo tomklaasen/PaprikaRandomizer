@@ -34,6 +34,8 @@ begin
   end
 
   $stderr.puts "" if $stderr.isatty
+
+  paprika.render_index_html(recipes)
   puts "Done. #{total} recipes synced, #{rendered} HTML pages rendered."
 
   hc_ping(base_url)

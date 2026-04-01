@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recepten</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Lora:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream:  #faf6f0;
+      --paper:  #f2ebe0;
+      --ink:    #2c1f0e;
+      --muted:  #8a7560;
+      --accent: #b84c2b;
+      --rule:   #d9cfc2;
+    }
+
+    body {
+      background: var(--cream);
+      color: var(--ink);
+      font-family: 'Lora', Georgia, serif;
+      min-height: 100vh;
+      padding: 3rem 1.5rem 6rem;
+    }
+
+    .page {
+      max-width: 720px;
+      margin: 0 auto;
+      animation: rise 0.6s ease both;
+    }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    header {
+      text-align: center;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid var(--rule);
+      margin-bottom: 2rem;
+    }
+
+    .label {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-style: italic;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1.2rem;
+    }
+
+    h1 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-weight: 700;
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      line-height: 1.15;
+      color: var(--ink);
+      margin-bottom: 1.8rem;
+    }
+
+    .search-wrap {
+      position: relative;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    .search-wrap svg {
+      position: absolute;
+      left: 0.9rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    #search {
+      width: 100%;
+      padding: 0.65rem 1rem 0.65rem 2.5rem;
+      border: 1px solid var(--rule);
+      border-radius: 4px;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: 'Lora', serif;
+      font-size: 0.9rem;
+      outline: none;
+    }
+
+    #search:focus {
+      border-color: var(--accent);
+    }
+
+    #search::placeholder {
+      color: var(--muted);
+    }
+
+    .group {
+      margin-bottom: 2.5rem;
+    }
+
+    .group-header {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--rule);
+      margin-bottom: 0.8rem;
+    }
+
+    ul {
+      list-style: none;
+    }
+
+    li {
+      border-bottom: 1px solid var(--rule);
+    }
+
+    li:last-child {
+      border-bottom: none;
+    }
+
+    a {
+      display: block;
+      padding: 0.55rem 0.25rem;
+      color: var(--ink);
+      text-decoration: none;
+      font-size: 0.95rem;
+      transition: color 0.15s, padding-left 0.15s;
+    }
+
+    a:hover {
+      color: var(--accent);
+      padding-left: 0.5rem;
+    }
+
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      font-style: italic;
+      font-size: 0.9rem;
+      padding: 3rem 0;
+      display: none;
+    }
+
+    #count {
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--muted);
+      font-style: italic;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <span class="label">Alle recepten</span>
+      <h1>Recepten</h1>
+      <div class="search-wrap">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input id="search" type="search" placeholder="Zoek een recept…" autofocus>
+      </div>
+    </header>
+
+    <p id="count"></p>
+
+    <div id="recipe-list">
+      {{RECIPE_LIST}}
+    </div>
+
+    <p class="empty" id="empty">Geen recepten gevonden.</p>
+  </div>
+
+  <script>
+    const input   = document.getElementById('search');
+    const count   = document.getElementById('count');
+    const empty   = document.getElementById('empty');
+    const list    = document.getElementById('recipe-list');
+    const items   = Array.from(list.querySelectorAll('li'));
+    const groups  = Array.from(list.querySelectorAll('.group'));
+    const total   = items.length;
+
+    function update() {
+      const q = input.value.trim().toLowerCase();
+      let visible = 0;
+      items.forEach(li => {
+        const match = !q || li.dataset.name.includes(q);
+        li.style.display = match ? '' : 'none';
+        if (match) visible++;
+      });
+      groups.forEach(g => {
+        const any = Array.from(g.querySelectorAll('li')).some(li => li.style.display !== 'none');
+        g.style.display = any ? '' : 'none';
+      });
+      count.textContent = q ? `${visible} van ${total} recepten` : `${total} recepten`;
+      empty.style.display = visible === 0 ? 'block' : 'none';
+      list.style.display  = visible === 0 ? 'none' : '';
+    }
+
+    input.addEventListener('input', update);
+    update();
+  </script>
+</body>
+</html>

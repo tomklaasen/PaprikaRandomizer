@@ -98,6 +98,38 @@ class Paprika
     path
   end
 
+  def render_index_html(recipes)
+    path = File.join(HTML_CACHE_DIR, "index.html")
+
+    category_map = categories.each_with_object({}) { |c, h| h[c["uid"]] = c["name"] }
+
+    grouped = recipes
+      .sort_by { |r| r["name"].downcase }
+      .group_by { |r| (r["categories"] || []).map { |uid| category_map[uid] }.compact.sort.first || "Overig" }
+      .sort_by { |name, _| name.downcase }
+
+    recipe_list = grouped.map do |category, group|
+      items = group.map do |r|
+        name = CGI.escapeHTML(r["name"])
+        uid  = CGI.escapeHTML(r["uid"])
+        %(<li data-name="#{name.downcase}"><a href="#{uid}.html">#{name}</a></li>)
+      end.join("\n        ")
+      <<~HTML
+        <div class="group">
+          <div class="group-header">#{CGI.escapeHTML(category)}</div>
+          <ul>
+            #{items}
+          </ul>
+        </div>
+      HTML
+    end.join("\n")
+
+    template = File.read(File.join(__dir__, "index_template.html"))
+    html = template.gsub("{{RECIPE_LIST}}", recipe_list)
+    File.write(path, html)
+    path
+  end
+
   def recipe_cached?(uid)
     cache_valid?(uid)
   end
