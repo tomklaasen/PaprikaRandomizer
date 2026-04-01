@@ -58,6 +58,19 @@ Restores a recipe from a backup and re-uploads it to Paprika. If no timestamp is
 .venv/bin/python restore_recipe.py <recipe-uid> 20260330_143000
 ```
 
+### `ruby backup_all.rb`
+
+Syncs all recipes from Paprika and renders every recipe as a styled HTML page. Suitable for running as a cronjob on another machine to keep a full local backup up to date.
+
+```
+# Example crontab entry — run every night at 2 AM
+0 2 * * * cd /path/to/PaprikaRandomizer && ruby backup_all.rb >> /var/log/paprika_backup.log 2>&1
+```
+
+Both the JSON files (`cache/`) and HTML pages (`html_cache/`) are updated. Only recipes that have changed since the last run are re-fetched from Paprika; unchanged ones are served from the local cache.
+
+To monitor the cronjob with [healthchecks.io](https://healthchecks.io), set `HEALTHCHECKS_URL` in `.env` to your check's ping URL. The script pings `/start` at the beginning, the base URL on success, and `/fail` on error.
+
 ## Caching
 
 The first run of `randomizer.rb` or `plan.rb` fetches all 800+ recipes from the Paprika API and caches them locally in `cache/`. Subsequent runs are instant — only new or updated recipes are re-fetched. Rendered HTML pages are cached in `html_cache/`.
