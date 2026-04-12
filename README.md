@@ -58,6 +58,10 @@ Restores a recipe from a backup and re-uploads it to Paprika. If no timestamp is
 .venv/bin/python restore_recipe.py <recipe-uid> 20260330_143000
 ```
 
+### `ruby history.rb`
+
+Shows all recipes that have appeared in your meal plan, sorted by how many times they were made. Each entry lists the count and all the dates. Recipes cached locally are shown as clickable links.
+
 ### `ruby backup_all.rb`
 
 Syncs all recipes from Paprika and renders every recipe as a styled HTML page. Suitable for running as a cronjob on another machine to keep a full local backup up to date.
