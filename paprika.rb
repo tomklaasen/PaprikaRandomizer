@@ -174,8 +174,16 @@ class Paprika
     uri = URI("#{API_BASE}#{path}")
     req = Net::HTTP::Get.new(uri)
     req.basic_auth(@email, @password)
-    res = Net::HTTP.start(uri.host, uri.port, use_ssl: true) { |http| http.request(req) }
-    JSON.parse(res.body)
+    attempts = 0
+    begin
+      attempts += 1
+      res = Net::HTTP.start(uri.host, uri.port, use_ssl: true, open_timeout: 30, read_timeout: 60) { |http| http.request(req) }
+      JSON.parse(res.body)
+    rescue Net::OpenTimeout, Net::ReadTimeout, Errno::ECONNRESET, Errno::ECONNREFUSED, SocketError, OpenSSL::SSL::SSLError, EOFError => e
+      raise if attempts >= 4
+      sleep(2 ** (attempts - 1))
+      retry
+    end
   end
 
   def fetch_in_parallel(uids)
