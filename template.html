@@ -209,9 +209,24 @@
     .directions li.section-header::before {
       content: none;
     }
+
+    /* ── back link ── */
+    .back {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.78rem;
+      font-style: italic;
+      color: var(--muted);
+      text-decoration: none;
+      margin-bottom: 2rem;
+    }
+
+    .back:hover { color: var(--accent); }
   </style>
 </head>
 <body>
+  <a class="back" href="index.html">← alle recepten</a>
   <article class="page">
     {{HERO}}
     <header class="header">
