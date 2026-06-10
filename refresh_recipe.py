@@ -24,7 +24,7 @@ HTML_CACHE_DIR = Path(__file__).parent / "html_cache"
 
 def get_paprika_token(email: str, password: str) -> str:
     resp = requests.post(f"{PAPRIKA_API}/v1/account/login/",
-                         data={"email": email, "password": password}, timeout=10)
+                         data={"email": email, "password": password}, timeout=30)
     resp.raise_for_status()
     return resp.json()["result"]["token"]
 
@@ -49,7 +49,7 @@ def fetch_photo(image_url: str | None) -> tuple[dict, bytes | None]:
     if not image_url:
         return {"photo": None, "photo_hash": None, "photo_large": None}, None
     try:
-        resp = requests.get(image_url, timeout=10)
+        resp = requests.get(image_url, timeout=30)
         resp.raise_for_status()
         data = resp.content
         return {"photo": f"{uuid.uuid4()}.jpg", "photo_hash": hashlib.sha256(data).hexdigest(), "photo_large": None}, data
@@ -152,6 +152,7 @@ def main():
     parser.add_argument("uid",  help="UID of the existing Paprika recipe to update")
     parser.add_argument("url", nargs="?", default=None, help="URL to scrape (defaults to the recipe's stored source_url)")
     parser.add_argument("--dry-run", action="store_true", help="Scrape and print without uploading")
+    parser.add_argument("--yes", "-y", action="store_true", help="Auto-confirm any prompts")
     args = parser.parse_args()
 
     load_dotenv()
@@ -183,9 +184,16 @@ def main():
 
     if existing_steps and len(scraped_steps) < len(existing_steps) * 0.5:
         print(f"Warning: scraped only {len(scraped_steps)} steps, existing has {len(existing_steps)}.")
-        answer = input("Continue anyway? [y/N] ").strip().lower()
-        if answer != "y":
-            sys.exit(1)
+        if args.yes:
+            print("Continuing due to --yes flag.")
+        else:
+            try:
+                answer = input("Continue anyway? [y/N] ").strip().lower()
+            except EOFError:
+                print("Non-interactive terminal. Use --yes to force. Aborting.")
+                sys.exit(1)
+            if answer != "y":
+                sys.exit(1)
 
     if args.dry_run:
         preview = {**recipe, "photo": f"<{len(photo_bytes)} bytes>" if photo_bytes else None}
