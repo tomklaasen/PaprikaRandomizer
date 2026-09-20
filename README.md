@@ -46,6 +46,16 @@ The script checks the scraped directions before uploading:
 - If directions are **empty**, it aborts to prevent data loss.
 - If directions have **fewer than 50% of the original steps**, it asks for confirmation before continuing.
 
+For `dagelijksekost.vrt.be` the directions are read straight from the page's Next.js payload: that site's
+JSON-LD only lists the first two steps, and the fallback in recipe-scrapers still expects the site's older
+data format. Step tips are kept as a `Tip: ...` line.
+
+Tests for that extraction live in `tests/` and run against a saved copy of the page:
+
+```
+.venv/bin/python -m unittest discover tests
+```
+
 ### `.venv/bin/python restore_recipe.py <uid> [timestamp]`
 
 Restores a recipe from a backup and re-uploads it to Paprika. If no timestamp is given and multiple backups exist, you'll be prompted to pick one.

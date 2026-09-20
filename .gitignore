@@ -5,3 +5,4 @@ cache/
 html_cache/
 backup/
 .venv/
+__pycache__/
