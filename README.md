@@ -46,11 +46,11 @@ The script checks the scraped directions before uploading:
 - If directions are **empty**, it aborts to prevent data loss.
 - If directions have **fewer than 50% of the original steps**, it asks for confirmation before continuing.
 
-For `dagelijksekost.vrt.be` the directions are read straight from the page's Next.js payload: that site's
-JSON-LD only lists the first two steps, and the fallback in recipe-scrapers still expects the site's older
-data format. Step tips are kept as a `Tip: ...` line.
-
-Tests for that extraction live in `tests/` and run against a saved copy of the page:
+For `dagelijksekost.vrt.be` the directions come from
+[dagelijksekost-scraper](https://github.com/tomklaasen/dagelijksekost-scraper), which reads them from the
+page's Next.js payload: that site's JSON-LD only lists the first two steps, and the fallback in
+recipe-scrapers still expects the site's older data format. Step tips are kept as a `Tip: ...` line. If
+that payload is ever gone, the script falls back to whatever recipe-scrapers finds.
 
 ```
 .venv/bin/python -m unittest discover tests

@@ -14,6 +14,7 @@ from pathlib import Path
 
 import requests
 from bs4 import BeautifulSoup
+from dagelijksekost import directions as dagelijksekost_directions
 from dotenv import load_dotenv
 from recipe_scrapers import scrape_html
 
@@ -61,54 +62,12 @@ def fetch_photo(image_url: str | None) -> tuple[dict, bytes | None]:
 HEADERS = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"}
 
 
-NEXT_CHUNK_RE = re.compile(r'self\.__next_f\.push\(\[\d+,("(?:[^"\\]|\\.)*")\]\)')
-
-
-def dagelijksekost_directions(html: str) -> str | None:
-    """Full instructions from the Next.js RSC payload, or None when it is not there.
-
-    The JSON-LD on dagelijksekost.vrt.be only lists the first two steps; all of them sit in the
-    streamed RSC payload under "recipeParts". recipe-scrapers has a fallback for this, but it
-    still expects the site's old {"0": "...", "1": "..."} format instead of today's step objects.
-    """
-    chunks = []
-    for chunk in NEXT_CHUNK_RE.findall(html):
-        try:
-            chunks.append(json.loads(chunk))
-        except json.JSONDecodeError:
-            continue
-    stream = "".join(chunks)
-
-    decoder = json.JSONDecoder()
-    for match in re.finditer(r'"recipeParts":', stream):
-        try:
-            parts, _ = decoder.raw_decode(stream, match.end())
-        except (json.JSONDecodeError, ValueError):
-            continue
-        if not isinstance(parts, list):
-            continue
-
-        lines = []
-        for part in parts:
-            steps = part.get("instructions") or []
-            for step in sorted(steps, key=lambda s: (s.get("part") or 0, s.get("step") or 0)):
-                description = (step.get("description") or "").strip()
-                if description:
-                    lines.append(description)
-                tip = (step.get("tip") or "").strip()
-                if tip:
-                    lines.append(f"Tip: {tip}")
-        if lines:
-            return "\n".join(lines)
-    return None
-
-
 def scrape_directions(scraper, html: str, url: str) -> str:
     """Directions, preferring a site-specific extraction where the page's JSON-LD is incomplete."""
     if requests.utils.urlparse(url).netloc.endswith("dagelijksekost.vrt.be"):
-        directions = dagelijksekost_directions(html)
-        if directions:
-            return directions
+        steps = dagelijksekost_directions(html)
+        if steps:
+            return steps
     try:
         return scraper.instructions() or ""
     except Exception:
