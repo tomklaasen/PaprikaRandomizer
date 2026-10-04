@@ -16,6 +16,7 @@ import requests
 from bs4 import BeautifulSoup
 from dagelijksekost import directions as dagelijksekost_directions
 from dotenv import load_dotenv
+from heading_scraper import HeadingScraper
 from recipe_scrapers import scrape_html
 
 PAPRIKA_API = "https://www.paprikaapp.com/api"
@@ -84,7 +85,10 @@ def scrape_recipe(url: str, existing: dict) -> tuple[dict, bytes | None]:
     try:
         scraper = scrape_html(html, org_url=final_url)
     except Exception:
-        scraper = scrape_html(html, org_url=final_url, wild_mode=True)
+        try:
+            scraper = scrape_html(html, org_url=final_url, wild_mode=True)
+        except Exception:
+            scraper = HeadingScraper(html, final_url)  # no Recipe schema, e.g. a Blogger post
 
     og_title = soup.find("meta", property="og:title")
     name = og_title["content"] if og_title and og_title.get("content") else (

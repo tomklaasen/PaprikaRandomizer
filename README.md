@@ -28,6 +28,26 @@ Picks a random main course (category: Hoofdgerecht) from your Paprika library an
 
 Shows the next 14 days of your Paprika meal plan. Recipes that are cached locally are shown as clickable links.
 
+### `.venv/bin/python add_recipe.py <url> [-c <category>]...`
+
+Scrapes a recipe from a URL and adds it to Paprika as a new recipe, then opens it in the browser. Uses the
+same scraping as `refresh_recipe.py` (including the dagelijksekost.vrt.be directions).
+
+```
+# Add a recipe, assigning one or more categories by name (case-insensitive)
+.venv/bin/python add_recipe.py https://dagelijksekost.vrt.be/gerechten/... -c Hoofdgerecht -c Vlees
+
+# Inspect what would be added, without uploading
+.venv/bin/python add_recipe.py --dry-run https://...
+```
+
+- An unknown category name aborts with the list of available categories. A name shared by several
+  categories assigns all of them.
+- If a locally cached recipe already has the same source URL, it asks before adding a duplicate and
+  suggests `refresh_recipe.py` instead.
+- If the scraped recipe has no name or no directions, it asks before uploading.
+- `--yes` / `-y` auto-confirms these prompts.
+
 ### `.venv/bin/python refresh_recipe.py <uid> [url]`
 
 Re-scrapes a recipe and updates it in Paprika, preserving the original UID and categories. If no URL is given, the recipe's stored source URL is used. Useful when a recipe's content has changed or moved to a new URL.
@@ -40,7 +60,7 @@ Re-scrapes a recipe and updates it in Paprika, preserving the original UID and c
 .venv/bin/python refresh_recipe.py <recipe-uid> https://dagelijksekost.vrt.be/gerechten/...
 ```
 
-Works with any site supported by [recipe-scrapers](https://github.com/hhursev/recipe-scrapers), with a generic fallback for unsupported sites. Before overwriting, the previous version is saved to `backup/<uid>_<timestamp>.json`.
+Works with any site supported by [recipe-scrapers](https://github.com/hhursev/recipe-scrapers), with a generic fallback for unsupported sites. Pages without any recipe data (such as most Blogger posts) are read by `heading_scraper.py`, which takes the list items under an "Ingrediënten"-style heading and a "Werkwijze"-style heading; a line just above a list of steps becomes an uppercase section header. Before overwriting, the previous version is saved to `backup/<uid>_<timestamp>.json`.
 
 The script checks the scraped directions before uploading:
 - If directions are **empty**, it aborts to prevent data loss.
