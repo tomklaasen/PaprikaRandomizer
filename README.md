@@ -101,6 +101,8 @@ Syncs all recipes from Paprika and renders every recipe as a styled HTML page. S
 0 2 * * * cd /path/to/PaprikaRandomizer && ruby backup_all.rb >> /var/log/paprika_backup.log 2>&1
 ```
 
+When output isn't going to a terminal (as in the crontab example above), each line is prefixed with a `[YYYY-MM-DD HH:MM:SS]` timestamp.
+
 Both the JSON files (`cache/`) and HTML pages (`html_cache/`) are updated. Only recipes that have changed since the last run are re-fetched from Paprika; unchanged ones are served from the local cache. An `html_cache/index.html` is also generated, listing all recipes grouped by category with a live search filter.
 
 Requests to the Paprika API use a 30s connect / 60s read timeout and retry up to 3 times with exponential backoff on transient network errors, so brief outages don't fail the whole sync.

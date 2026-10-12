@@ -8,6 +8,15 @@ require 'net/http'
 require 'uri'
 require_relative 'paprika'
 
+# Prefix every output line with a timestamp, so the cron log shows when each run happened.
+module Timestamped
+  def write(*strs)
+    super(strs.join.gsub(/^(?=.)/) { Time.now.strftime("[%Y-%m-%d %H:%M:%S] ") })
+  end
+end
+
+[$stdout, $stderr].each { |io| io.extend(Timestamped) unless io.isatty }
+
 def hc_ping(base_url, suffix = nil)
   return unless base_url
   url = suffix ? "#{base_url.chomp("/")}/#{suffix}" : base_url
