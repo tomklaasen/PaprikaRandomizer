@@ -105,7 +105,7 @@ When output isn't going to a terminal (as in the crontab example above), each li
 
 Both the JSON files (`cache/`) and HTML pages (`html_cache/`) are updated. Only recipes that have changed since the last run are re-fetched from Paprika; unchanged ones are served from the local cache. An `html_cache/index.html` is also generated, listing all recipes grouped by category with a live search filter.
 
-Requests to the Paprika API use a 30s connect / 60s read timeout and retry up to 3 times with exponential backoff on transient network errors, so brief outages don't fail the whole sync.
+Requests to the Paprika API use a 30s connect / 60s read timeout and retry up to 3 times with exponential backoff on transient network errors and server errors (HTTP 5xx), so brief outages don't fail the whole sync.
 
 To monitor the cronjob with [healthchecks.io](https://healthchecks.io), set `HEALTHCHECKS_URL` in `.env` to your check's ping URL. The script pings `/start` at the beginning, the base URL on success, and `/fail` on error.
 

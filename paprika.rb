@@ -13,6 +13,8 @@ class Paprika
   HTML_CACHE_DIR = File.join(__dir__, "html_cache")
   SKIP_HEADERS   = %w[BEREIDING INGREDIËNTEN INGREDIENTEN INSTRUCTIES].freeze
 
+  class ServerError < StandardError; end
+
   def initialize
     @email    = ENV["PAPRIKA_EMAIL"]    or raise "PAPRIKA_EMAIL not set"
     @password = ENV["PAPRIKA_PASSWORD"] or raise "PAPRIKA_PASSWORD not set"
@@ -178,8 +180,9 @@ class Paprika
     begin
       attempts += 1
       res = Net::HTTP.start(uri.host, uri.port, use_ssl: true, open_timeout: 30, read_timeout: 60) { |http| http.request(req) }
+      raise ServerError, "Paprika API returned HTTP #{res.code} for #{path}" if res.code.to_i >= 500
       JSON.parse(res.body)
-    rescue Net::OpenTimeout, Net::ReadTimeout, Errno::ECONNRESET, Errno::ECONNREFUSED, SocketError, OpenSSL::SSL::SSLError, EOFError => e
+    rescue ServerError, Net::OpenTimeout, Net::ReadTimeout, Errno::ECONNRESET, Errno::ECONNREFUSED, SocketError, OpenSSL::SSL::SSLError, EOFError => e
       raise if attempts >= 4
       sleep(2 ** (attempts - 1))
       retry
