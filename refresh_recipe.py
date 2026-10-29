@@ -75,11 +75,15 @@ def scrape_directions(scraper, html: str, url: str) -> str:
         return ""
 
 
-def scrape_recipe(url: str, existing: dict) -> tuple[dict, bytes | None]:
-    resp = requests.get(url, headers=HEADERS, timeout=30)
-    resp.raise_for_status()
-    html = resp.text
-    final_url = resp.url  # follow redirects for correct site detection
+def scrape_recipe(url: str, existing: dict, html: str | None = None) -> tuple[dict, bytes | None]:
+    """Scrape the recipe at url; pass html to use an already saved page instead of fetching it."""
+    if html is None:
+        resp = requests.get(url, headers=HEADERS, timeout=30)
+        resp.raise_for_status()
+        html = resp.text
+        final_url = resp.url  # follow redirects for correct site detection
+    else:
+        final_url = url
 
     soup = BeautifulSoup(html, "html.parser")
     try:
@@ -96,6 +100,7 @@ def scrape_recipe(url: str, existing: dict) -> tuple[dict, bytes | None]:
     )
     name = re.sub(r"(?i)^recept voor\s+", "", name).strip()  # remove "Recept voor " prefix
     name = re.sub(r"\s*\|.*$", "", name).strip()             # remove " | Store name" suffix
+    name = re.sub(r"(?i)\s+recept\s+-\s+Allerhande$", "", name).strip()  # remove AH's " recept - Allerhande" suffix
 
     def safe(fn, default=None):
         try:

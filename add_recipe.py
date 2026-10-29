@@ -105,7 +105,10 @@ def main():
     parser.add_argument("url", help="URL of the recipe to scrape")
     parser.add_argument("--category", "-c", action="append", default=[],
                         help="Paprika category name to assign (repeatable)")
-    parser.add_argument("--dry-run", action="store_true", help="Scrape and print without uploading")
+    parser.add_argument("--html", type=Path,
+                        help="Saved copy of the page to scrape instead of fetching the URL "
+                             "(for sites that block scripts)")
+    parser.add_argument("--dry-run",action="store_true", help="Scrape and print without uploading")
     parser.add_argument("--yes", "-y", action="store_true", help="Auto-confirm any prompts")
     args = parser.parse_args()
 
@@ -128,9 +131,17 @@ def main():
             print(f"Error: {e}")
             sys.exit(1)
 
-    print(f"Scraping: {args.url}")
+    html = None
+    if args.html:
+        try:
+            html = args.html.read_text(encoding="utf-8", errors="replace")
+        except OSError as e:
+            print(f"Error: could not read {args.html}: {e}")
+            sys.exit(1)
+
+    print(f"Scraping: {args.url}" + (f" (from {args.html})" if args.html else ""))
     try:
-        recipe, photo_bytes = scrape_recipe(args.url, new_recipe(category_uids))
+        recipe, photo_bytes = scrape_recipe(args.url, new_recipe(category_uids), html)
     except requests.RequestException as e:
         print(f"Error: could not fetch the recipe page: {e}")
         sys.exit(1)

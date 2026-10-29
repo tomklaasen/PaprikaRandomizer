@@ -11,10 +11,11 @@ import json
 import sys
 import unittest
 from pathlib import Path
+from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from refresh_recipe import scrape_directions
+from refresh_recipe import scrape_directions, scrape_recipe
 
 DAGELIJKSEKOST_URL = "https://dagelijksekost.vrt.be/gerechten/iets"
 OTHER_URL          = "https://example.com/recipes/iets"
@@ -62,3 +63,18 @@ class ScrapeDirectionsTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+SAVED_PAGE = """<html><head><script type="application/ld+json">{"@context": "https://schema.org",
+"@type": "Recipe", "name": "Erwtensoep", "recipeIngredient": ["500 g spliterwten"],
+"recipeInstructions": [{"@type": "HowToStep", "text": "Kook de erwten."}]}</script></head></html>"""
+
+
+class ScrapeRecipeTest(unittest.TestCase):
+    def test_uses_a_saved_page_without_fetching_the_url(self):
+        with mock.patch("refresh_recipe.requests.get", side_effect=AssertionError("fetched")):
+            recipe, _ = scrape_recipe(OTHER_URL, {"name": ""}, SAVED_PAGE)
+
+        self.assertEqual("500 g spliterwten", recipe["ingredients"])
+        self.assertEqual("Kook de erwten.", recipe["directions"])
+        self.assertEqual(OTHER_URL, recipe["source_url"])

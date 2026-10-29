@@ -39,6 +39,9 @@ same scraping as `refresh_recipe.py` (including the dagelijksekost.vrt.be direct
 
 # Inspect what would be added, without uploading
 .venv/bin/python add_recipe.py --dry-run https://...
+
+# For sites that block scripts (e.g. ah.nl): save the page in your browser and pass the file
+.venv/bin/python add_recipe.py https://www.ah.nl/allerhande/recept/... --html ~/Downloads/recept.html
 ```
 
 - An unknown category name aborts with the list of available categories. A name shared by several
