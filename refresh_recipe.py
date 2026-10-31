@@ -86,11 +86,12 @@ def scrape_recipe(url: str, existing: dict, html: str | None = None) -> tuple[di
         final_url = url
 
     soup = BeautifulSoup(html, "html.parser")
+    # best_image off: it ranks by known dimensions, so a sized og:image logo beats an unsized recipe photo
     try:
-        scraper = scrape_html(html, org_url=final_url)
+        scraper = scrape_html(html, org_url=final_url, best_image=False)
     except Exception:
         try:
-            scraper = scrape_html(html, org_url=final_url, wild_mode=True)
+            scraper = scrape_html(html, org_url=final_url, wild_mode=True, best_image=False)
         except Exception:
             scraper = HeadingScraper(html, final_url)  # no Recipe schema, e.g. a Blogger post
 

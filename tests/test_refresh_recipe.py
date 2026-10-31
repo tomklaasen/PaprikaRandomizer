@@ -78,3 +78,13 @@ class ScrapeRecipeTest(unittest.TestCase):
         self.assertEqual("500 g spliterwten", recipe["ingredients"])
         self.assertEqual("Kook de erwten.", recipe["directions"])
         self.assertEqual(OTHER_URL, recipe["source_url"])
+
+    def test_prefers_the_recipe_image_over_a_larger_og_image(self):
+        # sofiedumont.be: og:image is the site logo with dimensions, the recipe image has none
+        page = SAVED_PAGE.replace('"name": "Erwtensoep",', '"name": "Erwtensoep", "image": "https://img.example/soep.jpg",').replace(
+            "<head>", '<head><meta property="og:image" content="https://img.example/logo.png">'
+                      '<meta property="og:image:width" content="200"><meta property="og:image:height" content="132">')
+        with mock.patch("refresh_recipe.fetch_photo", return_value=({}, None)):
+            recipe, _ = scrape_recipe(OTHER_URL, {"name": ""}, page)
+
+        self.assertEqual("https://img.example/soep.jpg", recipe["image_url"])
